@@ -6,14 +6,17 @@ export async function POST(req: NextRequest) {
     const { url } = await req.json()
 
     if (!url) {
-      return NextResponse.json(
-        { error: 'URL is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'URL is required' }, { status: 400 })
     }
 
     const ytDlp = new YTDlpWrap('yt-dlp')
-    const metadata = await ytDlp.getVideoInfo(url)
+
+    const metadata = await ytDlp.getVideoInfo([
+      url,
+      '--no-check-certificates',
+      '--user-agent',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    ])
 
     const formats = metadata.formats
       ?.filter((f: any) => f.url)
@@ -35,6 +38,18 @@ export async function POST(req: NextRequest) {
       title: metadata.title,
       thumbnail: metadata.thumbnail,
       duration: metadata.duration,
+      uploader: metadata.uploader,
+      formats: formats || [],
+    })
+
+  } catch (error: any) {
+    console.error('Analyze error:', error)
+    return NextResponse.json(
+      { error: error.message || 'Unknown error' },
+      { status: 500 }
+    )
+  }
+      }      duration: metadata.duration,
       uploader: metadata.uploader,
       formats: formats || [],
     })
