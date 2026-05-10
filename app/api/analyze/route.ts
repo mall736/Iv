@@ -11,12 +11,16 @@ export async function POST(req: NextRequest) {
 
     const ytDlp = new YTDlpWrap('yt-dlp')
 
-    const metadata = await ytDlp.getVideoInfo([
+    const output = await ytDlp.execPromise([
       url,
+      '--dump-json',
+      '--no-playlist',
       '--no-check-certificates',
       '--user-agent',
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
     ])
+
+    const metadata = JSON.parse(output)
 
     const formats = metadata.formats
       ?.filter((f: any) => f.url)
@@ -35,6 +39,21 @@ export async function POST(req: NextRequest) {
       ?.slice(0, 8)
 
     return NextResponse.json({
+      title: metadata.title,
+      thumbnail: metadata.thumbnail,
+      duration: metadata.duration,
+      uploader: metadata.uploader,
+      formats: formats || [],
+    })
+
+  } catch (error: any) {
+    console.error('Analyze error:', error)
+    return NextResponse.json(
+      { error: error.message || 'Unknown error' },
+      { status: 500 }
+    )
+  }
+}    return NextResponse.json({
       title: metadata.title,
       thumbnail: metadata.thumbnail,
       duration: metadata.duration,
