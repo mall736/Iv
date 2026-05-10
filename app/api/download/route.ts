@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const ytDlp = new YTDlpWrap()
+    const ytDlp = new YTDlpWrap('yt-dlp')
     const outputPath = join(tmpdir(), `iv-${Date.now()}.${ext || 'mp4'}`)
 
     await ytDlp.execPromise([
