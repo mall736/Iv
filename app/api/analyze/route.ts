@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const ytDlp = new YTDlpWrap()
+    const ytDlp = new YTDlpWrap('yt-dlp')
     const metadata = await ytDlp.getVideoInfo(url)
 
     const formats = metadata.formats
